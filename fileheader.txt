@@ -1,18 +1,12 @@
-This file is part of the OpenInfraEdgeCloudEvaluation :- 
-a set of programs, concepts, and documents for evaluating 
-Open Infrastructure Edge Cloud scenarios
+This file is part of the k8s-gluster-heketi-ansible project,
+an ansible collection to install glusterfs and heketi into
+kubernetes to provide dynamic persistent volumes.
 
-(c) 2019 Andreas Florath, Deutsche Telekom AG
+(c) 2020 Andreas Florath, Deutsche Telekom AG
 
-By default 
-a) all program files (source code + configuration) of this project 
-   are licensed under the Apache-2.0 license. For details see the 
-   file 'LICENSE' in the top directory.
-   https://opensource.org/licenses/Apache-2.0
-b) all concept and documentation files of this project are licensed 
-   under the Creative Commons Share Alike License. For details see
-   the file LICENSE.pdf in doc/ and concepts/ or
-   https://creativecommons.org/licenses/by-nc-sa/4.0/
+By default all files of this project are licensed under the Apache-2.0
+license. For details see the file 'LICENSE' in the top directory.
+https://opensource.org/licenses/Apache-2.0
 
-
+SPDX-License-Identifier: Apache-2.0
 
