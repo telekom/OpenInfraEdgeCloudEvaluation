@@ -22,7 +22,7 @@
 - name: "Retrieve gluster-pod IPs"
   command: >
     kubectl get pods
-    --namespace={{ gluster_heketi_ns }}
+    --namespace={{ gluster_namespace }}
     -o jsonpath='{.items[?(@.spec.containers[*].name=="glusterfs")].status.podIP}'
   changed_when: false
   register: get_ips
@@ -36,7 +36,7 @@
 - name: "Retrieve gluster-server nodenames"
   command: >
     kubectl get pods
-    --namespace={{ gluster_heketi_ns }}
+    --namespace={{ gluster_namespace }}
     -o jsonpath='{.items[?(@.spec.containers[*].name=="glusterfs")].spec.nodeName}'
   changed_when: false
   register: get_nodenames

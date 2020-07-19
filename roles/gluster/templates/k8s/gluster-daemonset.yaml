@@ -21,7 +21,7 @@ kind: DaemonSet
 apiVersion: apps/v1
 metadata:
   name: glusterfs
-  namespace: {{ gluster_heketi_ns }}
+  namespace: {{ gluster_namespace }}
   labels:
     glusterfs: deployment
   annotations:

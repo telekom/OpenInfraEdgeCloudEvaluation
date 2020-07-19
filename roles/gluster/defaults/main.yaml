@@ -9,7 +9,7 @@ gluster_kernel_modules:
   - 'dm_mirror'
   - 'dm_thin_pool'
 
-gluster_heketi_ns: 'gluster-heketi-ns'
+gluster_namespace: 'gluster-heketi-ns'
 
 # Version list:
 # https://github.com/gluster/gluster-containers
