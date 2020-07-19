@@ -1,0 +1,39 @@
+---
+
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+- name: "Create configuration directory"
+  file:
+    state: directory
+    path: "{{ heketi_config_dir }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: "Create topology file"
+  template:
+    src: heketi-topology.json
+    dest: "{{ heketi_config_dir }}/heketi-topology.json"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: "Bootstrap heketi"
+  include: heketi-bootstrap.yaml
+  # Ensure that it is running only once and always
+  # on the same host.
+  when: inventory_hostname == ansible_play_hosts_all.0
+
+- name: "STOP IT"
+  shell: "false"
+  run_once: true

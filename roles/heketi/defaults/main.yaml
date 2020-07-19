@@ -12,12 +12,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-- name: "Ensure that all hosts are reachable"
-  assert:
-    that:
-      - ansible_play_hosts == ansible_play_hosts_all
-    quiet: true
+heketi_gluster_storage_device: "/dev/vdb"
 
-- include: preparation.yaml
-- include: k8s-resources.yaml
-- include: gluster-config.yaml
+# Directory where to place config files, e.g. the topology file.
+heketi_config_dir: "/opt/k8s-gluster-heketi-ansible"
+
+heketi_namespace: 'gluster-heketi-ns'

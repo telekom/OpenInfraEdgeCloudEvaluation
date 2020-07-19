@@ -12,12 +12,18 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-- name: "Ensure that all hosts are reachable"
-  assert:
-    that:
-      - ansible_play_hosts == ansible_play_hosts_all
-    quiet: true
+- name: "Create heketi namespace"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/namespace.yaml') }}"
 
-- include: preparation.yaml
-- include: k8s-resources.yaml
-- include: gluster-config.yaml
+- name: "Create heketi service account"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/service-account.yaml') }}"
+
+- name: "Create heketi cluster role binding"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/cluster-role-binding.yaml') }}"
+    

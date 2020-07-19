@@ -1,0 +1,29 @@
+{
+    "_copyright":
+    "This file is part of the k8s-gluster-heketi-ansible project,\nan ansible collection to install glusterfs and heketi into\nkubernetes to provide dynamic persistent volumes.\n\n(c) 2020 Andreas Florath, Deutsche Telekom AG\n\nBy default all files of this project are licensed under the Apache-2.0\nlicense. For details see the file 'LICENSE' in the top directory.\nhttps://opensource.org/licenses/Apache-2.0\n\nSPDX-License-Identifier: Apache-2.0\n",
+    
+    "clusters": [
+	{
+	    "nodes": [
+{% for host, ip in gluster_host_ips.items() %}      
+		{
+		    "node": {
+			"hostnames": {
+			    "manage": [
+				"{{ host }}"
+			    ],
+			    "storage": [
+				"{{ ip }}"
+			    ]
+			},
+			"zone": 1
+		    },
+		    "devices": [
+			"{{ heketi_gluster_storage_device }}"
+		    ]
+		}{% if not loop.last %},{% endif %}
+{% endfor %}
+	    ]
+	}
+    ]
+}

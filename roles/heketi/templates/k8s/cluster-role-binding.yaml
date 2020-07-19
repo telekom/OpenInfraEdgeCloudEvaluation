@@ -12,12 +12,19 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-- name: "Ensure that all hosts are reachable"
-  assert:
-    that:
-      - ansible_play_hosts == ansible_play_hosts_all
-    quiet: true
-
-- include: preparation.yaml
-- include: k8s-resources.yaml
-- include: gluster-config.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: storage-heketi-binding
+  labels:
+    glusterfs: heketi-sa-view
+    heketi: sa-view
+    heketi-bootstrap: 'true'
+subjects:
+  - kind: ServiceAccount
+    name: heketi-service-account
+    namespace: "{{ heketi_namespace }}"
+roleRef:
+  kind: ClusterRole
+  name: edit
+  apiGroup: rbac.authorization.k8s.io
