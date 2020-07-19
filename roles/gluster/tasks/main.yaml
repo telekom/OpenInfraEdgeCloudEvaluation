@@ -12,6 +12,16 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-- name: "Test it"
-  debug:
-    msg: "Hello World"
+- name: "Ensure that all hosts are reachable"
+  assert:
+    that:
+      - ansible_play_hosts == ansible_play_hosts_all
+    quiet: true
+
+- include: preparation.yaml
+- include: k8s-resources.yaml
+- include: gluster-config.yaml
+
+- name: "STOP IT"
+  shell: "false"
+  run_once: true

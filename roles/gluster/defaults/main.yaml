@@ -1,0 +1,16 @@
+---
+gluster_kernel_modules:
+  - 'target_core_file'
+  - 'target_core_pscsi'
+  - 'target_core_mod'
+  - 'target_core_iblock'
+  - 'target_core_user'
+  - 'dm_snapshot'
+  - 'dm_mirror'
+  - 'dm_thin_pool'
+
+gluster_heketi_ns: 'gluster-heketi-ns'
+
+# Version list:
+# https://github.com/gluster/gluster-containers
+gluster_image: 'gluster/gluster-centos:gluster4u0_centos7'

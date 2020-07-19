@@ -1,0 +1,63 @@
+---
+
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) contributors of manics/ansible-role-k8s-heketi-gluster
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# This is derivated work. Original
+# https://github.com/manics/ansible-role-k8s-heketi-gluster/blob/master/tasks/heketi.yml
+# also under Apache-2.0 license.
+
+# Set the 'output' variables of the gluster installation
+
+- name: "Retrieve gluster-pod IPs"
+  command: >
+    kubectl get pods
+    --namespace={{ gluster_heketi_ns }}
+    -o jsonpath='{.items[?(@.spec.containers[*].name=="glusterfs")].status.podIP}'
+  changed_when: false
+  register: get_ips
+  run_once: true
+
+- name: "Set fact endpoint_list"
+  set_fact:
+    endpoint_list: "[\"{{get_ips.stdout | replace(' ','\",\"')}}\"]"
+  run_once: true
+
+- name: "Retrieve gluster-server nodenames"
+  command: >
+    kubectl get pods
+    --namespace={{ gluster_heketi_ns }}
+    -o jsonpath='{.items[?(@.spec.containers[*].name=="glusterfs")].spec.nodeName}'
+  changed_when: false
+  register: get_nodenames
+  run_once: true
+
+- name: "Set fact host_list"
+  set_fact:
+    host_list: "[\"{{get_nodenames.stdout | replace(' ','\",\"')}}\"]"
+  run_once: true
+
+- name: "Combine host-list with endpoint-list"
+  set_fact:
+    gluster_host_ips: "{{ gluster_host_ips | combine({item.0: item.1}) }}"
+  with_together:
+    - "{{ host_list }}"
+    - "{{ endpoint_list }}"
+  vars:
+    gluster_host_ips: {}
+  run_once: true
+
+- name: "Output list"
+  debug:
+    var: gluster_host_ips
+  run_once: true

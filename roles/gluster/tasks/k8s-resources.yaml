@@ -1,0 +1,31 @@
+---
+
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+- name: "Create gluster heketi namespace"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/namespace.yaml') }}"
+  run_once: true
+
+- name: "Create gluster daemonset"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/gluster-daemonset.yaml') }}"
+    wait: true
+    wait_sleep: 5
+    wait_timeout: 180
+  run_once: true
+
+# ToDo: Unclear if there is the need to wait also for the pods
+#       or if this is already done in deamon-set wait.
