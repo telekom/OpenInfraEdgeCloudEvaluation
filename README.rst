@@ -20,6 +20,14 @@ Introduction
 Installs glusterfs and heketi into kubernetes for dynamic persistent
 volume handling.
 
+Status
+======
+
+In development.
+
+gluster role is ready to use.
+heketi role is under heavy development and can not yet be used.
+
 References
 ==========
 
