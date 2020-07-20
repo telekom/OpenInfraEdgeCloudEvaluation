@@ -35,5 +35,7 @@
     name: python3-pip
 
 - name: "Install openshift python lib"
-  pip:
-    name: openshift
+  shell: |
+    . /etc/proxy.sh && pip3 install openshift
+  args:
+    creates: /usr/local/lib/python3.6/dist-packages/openshift
