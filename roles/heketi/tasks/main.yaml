@@ -12,22 +12,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-- name: "Create configuration directory"
-  file:
-    state: directory
-    path: "{{ heketi_config_dir }}"
-    owner: root
-    group: root
-    mode: '0755'
-
-- name: "Create topology file"
-  template:
-    src: heketi-topology.json
-    dest: "{{ heketi_config_dir }}/heketi-topology.json"
-    owner: root
-    group: root
-    mode: '0644'
-
 - name: "Bootstrap heketi"
   include: heketi-bootstrap.yaml
   # Ensure that it is running only once and always

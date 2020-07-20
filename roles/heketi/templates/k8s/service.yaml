@@ -12,14 +12,20 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-heketi_gluster_storage_device: "/dev/vdb"
-
-# Directory where to place config files, e.g. the topology file.
-heketi_config_dir: "/opt/k8s-gluster-heketi-ansible"
-
-heketi_namespace: 'gluster-heketi-ns'
-heketi_storage_namespace: 'storage-heketi-ns'
-
-# Heketi container image
-# Info: https://hub.docker.com/r/heketi/heketi
-heketi_image: "heketi/heketi:dev"
+kind: Service
+apiVersion: v1
+metadata:
+  name: deploy-heketi
+  namespace: {{ heketi_namespace }}
+  labels:
+    glusterfs: heketi-service
+    deploy-heketi: support
+  annotations:
+    description: Exposes Heketi Service
+spec:
+  selector:
+    name: deploy-heketi
+  ports:
+    - name: deploy-heketi
+      port: 8080
+      targetPort: 8080

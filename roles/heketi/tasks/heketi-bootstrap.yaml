@@ -4,6 +4,7 @@
 # an ansible collection to install glusterfs and heketi into
 # kubernetes to provide dynamic persistent volumes.
 #
+# (c) contributors of manics/ansible-role-k8s-heketi-gluster
 # (c) 2020 Andreas Florath, Deutsche Telekom AG
 #
 # By default all files of this project are licensed under the Apache-2.0
@@ -11,6 +12,22 @@
 # https://opensource.org/licenses/Apache-2.0
 #
 # SPDX-License-Identifier: Apache-2.0
+
+- name: "Create configuration directory"
+  file:
+    state: directory
+    path: "{{ heketi_config_dir }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: "Create topology file"
+  template:
+    src: heketi-topology.json
+    dest: "{{ heketi_config_dir }}/heketi-topology.json"
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: "Create heketi namespace"
   k8s:
@@ -26,4 +43,72 @@
   k8s:
     state: present
     definition: "{{ lookup('template', 'k8s/cluster-role-binding.yaml') }}"
-    
+
+- name: "Create heketi service"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/service.yaml') }}"
+
+- name: "Create heketi deploy deployment"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/heketi-deploy-deployment.yaml') }}"
+    wait: true
+    wait_sleep: 5
+    wait_timeout: 180
+
+# Prepare the heketi-cli command
+
+- name: "Get name of deployment pod"
+  k8s_info:
+    kind: Pod
+    label_selectors:
+      - name =  deploy-heketi
+  register: heketi_deploy_pod
+
+#- debug:
+#    var: heketi_deploy_pod
+
+- name: "Get heketi bootstrap service information"
+  k8s_info:
+    kind: Service
+    name: deploy-heketi
+    namespace: "{{ heketi_namespace }}"
+  register: heketi_bootstrap_service
+
+#- debug:
+#    var: heketi_bootstrap_service
+
+- name: "Set heketi bootstrap endpoint"
+  set_fact:
+    heketi_bootstrap_endpoint: "{{ heketi_bootstrap_service.resources[0].spec.clusterIP }}:{{ heketi_bootstrap_service.resources[0].spec.ports[0].port }}"
+
+- name: "Set heketi_exec_pod_name"
+  set_fact:
+    heketi_exec_pod_name: "{{ heketi_deploy_pod.resources[0].metadata.name }}"
+
+- name: "Set heketi_exec_pod command"
+  set_fact:
+    heketi_exec_pod: "kubectl exec -n {{ heketi_namespace }} {{ heketi_exec_pod_name }} --"
+
+- name: "Set heketi-cli command"
+  set_fact:
+    heketi_cli_cmd: "{{ heketi_exec_pod }} heketi-cli -s http://{{ heketi_bootstrap_endpoint  }}"
+
+- debug:
+    var: heketi_cli_cmd
+
+- name: "Copy the topology file to the pod"
+  command: >-
+    kubectl cp {{ heketi_config_dir }}/heketi-topology.json
+    {{ heketi_namespace }}/{{ heketi_exec_pod_name }}:/tmp/heketi-topology.json
+
+- name: "Load the topology file to heketi"
+  command: >-
+    {{ heketi_cli_cmd }} topology load
+    --json=/tmp/heketi-topology.json
+
+- name: "Setup storage"
+  command: >-
+    {{ heketi_cli_cmd }} setup-openshift-heketi-storage
+    --listfile=/tmp/heketi-storage.json
