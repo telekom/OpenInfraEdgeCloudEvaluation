@@ -18,7 +18,7 @@
 namespace: telekom
 
 # The name of the collection. Has the same character restrictions as 'namespace'
-name: OpenInfraEdgeCloudEvaluation
+name: k8s_gluster_heketi_ansible
 
 # The version of the collection. Must be compatible with semantic versioning
 version: 0.1.1
@@ -58,13 +58,13 @@ tags: ['kubernetes', 'k8s', 'gluster', 'glusterfs', 'heketi', 'ansible', 'persis
 dependencies: {}
 
 # The URL of the originating SCM repository
-repository: https://github.com/telekom/OpenInfraEdgeCloudEvaluation
+repository: https://github.com/telekom/k8s-gluster-heketi-ansible
 
 # The URL to any online docs
-documentation: https://github.com/telekom/OpenInfraEdgeCloudEvaluation
+documentation: https://github.com/telekom/k8s-gluster-heketi-ansible
 
 # The URL to the homepage of the collection/project
-homepage: https://github.com/telekom/OpenInfraEdgeCloudEvaluation
+homepage: https://github.com/telekom/k8s-gluster-heketi-ansible
 
 # The URL to the collection issue tracker
-issues: https://github.com/telekom/OpenInfraEdgeCloudEvaluation/issues
+issues: https://github.com/telekom/k8s-gluster-heketi-ansible/issues
