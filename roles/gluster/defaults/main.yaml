@@ -26,4 +26,4 @@ gluster_namespace: 'gluster-heketi-ns'
 
 # Version list:
 # https://github.com/gluster/gluster-containers
-gluster_image: 'gluster/gluster-centos:gluster4u0_centos7'
+gluster_image: 'gluster/gluster-centos:gluster4u1_centos7'
