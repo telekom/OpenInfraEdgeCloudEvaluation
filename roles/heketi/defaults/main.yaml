@@ -18,8 +18,18 @@ heketi_gluster_storage_device: "/dev/vdb"
 heketi_config_dir: "/opt/k8s-gluster-heketi-ansible"
 
 heketi_namespace: 'gluster-heketi-ns'
-heketi_storage_namespace: 'storage-heketi-ns'
+# heketi_storage_namespace: 'storage-heketi-ns'
 
 # Heketi container image
 # Info: https://hub.docker.com/r/heketi/heketi
 heketi_image: "heketi/heketi:dev"
+
+# Heketi client
+# Info: https://github.com/heketi/heketi/releases/
+heketi_client_url: "https://github.com/heketi/heketi/releases/download/v9.0.0/heketi-client-v9.0.0.linux.amd64.tar.gz"
+
+# User Token / Keys
+# XXX ToDo: create new one for each run
+# XXX ToDo: secret one
+heketi_user_key: user-key-934
+heketi_admin_key: admin-key-934

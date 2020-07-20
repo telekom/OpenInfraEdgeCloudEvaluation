@@ -41,10 +41,14 @@ spec:
         imagePullPolicy: IfNotPresent
         name: deploy-heketi
         env:
+          - name: HEKETI_USER_KEY
+            value: "{{ heketi_user_key }}"
+          - name: HEKETI_ADMIN_KEY
+            value: "{{ heketi_admin_key }}"
           - name: HEKETI_EXECUTOR
             value: "kubernetes"
           - name: HEKETI_KUBE_NAMESPACE
-            value: "{{ heketi_storage_namespace }}"
+            value: "{{ heketi_namespace }}"
           - name: HEKETI_FSTAB
             value: "/var/lib/heketi/fstab"
           - name: HEKETI_SNAPSHOT_LIMIT

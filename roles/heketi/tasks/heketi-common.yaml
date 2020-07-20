@@ -1,0 +1,46 @@
+---
+
+# Common thingies for the heketi installation
+
+- name: "Create local dir for file detemplation"
+  file:
+    state: directory
+    path: detemplized
+    mode: '0755'
+  run_once: true
+  delegate_to: localhost
+
+- name: "Create heketi.json file locally"
+  template:
+    src: heketi.json
+    dest: detemplized/heketi.json
+  run_once: true
+  delegate_to: localhost
+
+- name: "Encode heketi.json"
+  set_fact:
+    heketi_json_base64: "{{ item | string | b64encode }}"
+  with_file:
+    - detemplized/heketi.json
+  no_log: True
+
+- name: "Create topology file"
+  template:
+    src: heketi-topology.json
+    dest: detemplized/heketi-topology.json
+  run_once: true
+  delegate_to: localhost
+
+- name: "Encode heketi-topology.json"
+  set_fact:
+    topology_json_base64: "{{ item | string | b64encode }}"
+  with_file:
+    - detemplized/heketi-topology.json
+  no_log: True
+
+#- name: "Encode ssh key"
+#  set_fact:
+#    private_key_base64: "{{ item | string | b64encode }}"
+#  with_file:
+#    - "{{ k8s_ssh_priv_key_local }}"
+#  no_log: True

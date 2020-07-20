@@ -29,6 +29,24 @@
     group: root
     mode: '0644'
 
+- name: "Download heketi client"
+  shell: |
+    . /etc/proxy.sh && wget -O "{{ heketi_config_dir }}/heketi-client-linux.amd64.tar.gz" "{{ heketi_client_url }}"
+
+- name: "Set heketi-cli"
+  set_fact:
+    heketi_cli: "{{ heketi_config_dir }}/heketi-client/bin/heketi-cli"
+
+- name: "Extract heketi client"
+  unarchive:
+    src: "{{ heketi_config_dir }}/heketi-client-linux.amd64.tar.gz"
+    dest: "{{ heketi_config_dir }}"
+    remote_src: yes
+    extra_opts:
+      - --strip-components=1
+      - --one-top-level=heketi-client
+    creates: "{{ heketi_cli }}"
+
 - name: "Create heketi namespace"
   k8s:
     state: present
@@ -91,24 +109,37 @@
   set_fact:
     heketi_exec_pod: "kubectl exec -n {{ heketi_namespace }} {{ heketi_exec_pod_name }} --"
 
-- name: "Set heketi-cli command"
+- name: "Set heketi_cli command"
   set_fact:
-    heketi_cli_cmd: "{{ heketi_exec_pod }} heketi-cli -s http://{{ heketi_bootstrap_endpoint  }}"
+    heketi_cli: "heketi-cli -s http://{{ heketi_bootstrap_endpoint  }} --user admin --secret {{ heketi_admin_key }}"
+
+- name: "Set heketi_cli_local command"
+  set_fact:
+    heketi_cli_local: "{{ heketi_config_dir }}/heketi-client/bin/{{ heketi_cli }}"
 
 - debug:
-    var: heketi_cli_cmd
+    var: heketi_cli_local
 
-- name: "Copy the topology file to the pod"
-  command: >-
-    kubectl cp {{ heketi_config_dir }}/heketi-topology.json
-    {{ heketi_namespace }}/{{ heketi_exec_pod_name }}:/tmp/heketi-topology.json
+- name: "Set k8s-heketi-cli command"
+  set_fact:
+    k8s_heketi_cmd: "{{ heketi_exec_pod }} {{ heketi_cli }}"
 
-- name: "Load the topology file to heketi"
+- debug:
+    var: k8s_heketi_cmd
+
+- shell: 'false'
+
+- name: "Load topology file into heteki - this will take >20 minutes: REALLY!"
   command: >-
-    {{ heketi_cli_cmd }} topology load
-    --json=/tmp/heketi-topology.json
+    {{ heketi_cli_local }} topology load --json="{{ heketi_config_dir }}/heketi-topology.json"
+  register: heketi_load_topology
+
+- name: "Display output of load topology"
+  debug:
+    var: heketi_load_topology
 
 - name: "Setup storage"
   command: >-
-    {{ heketi_cli_cmd }} setup-openshift-heketi-storage
-    --listfile=/tmp/heketi-storage.json
+    {{ heketi_cli_local }} setup-openshift-heketi-storage --listfile={{ heketi_config_dir }}/heketi-storage.json
+  args:
+    creates: "{{ heketi_config_dir }}/heketi-storage.json"

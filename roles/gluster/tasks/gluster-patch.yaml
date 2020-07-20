@@ -1,0 +1,46 @@
+---
+
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Problem: pvs and friends take some minutes to run into timeout
+# in a container where no udev is available.
+
+- name: "Get names of glusterfs pods"
+  k8s_info:
+    kind: Pod
+    label_selectors:
+      - glusterfs-node=daemonset
+    namespace: "{{ gluster_namespace }}"
+  register: glusterfs_pods
+
+- debug:
+    var: glusterfs_pods
+
+- name: "Extract pod names"
+  set_fact:
+    gluster_pod_names: "{{ gluster_pod_names + [ item.metadata.name ] }}"
+  with_items: "{{ glusterfs_pods.resources }}"
+  vars:
+    gluster_pod_names: []
+    
+- debug:
+    var: gluster_pod_names
+
+- name: "Patch /etc/lvm/lvm.config"
+  shell: |
+    kubectl exec -n {{ gluster_namespace }} {{ item }} -- sed -i -e 's|external_device_info_source = "udev"|external_device_info_source = "none"|g' /etc/lvm/lvm.conf
+  with_items: "{{ gluster_pod_names }}"
+
+#  shell: |
+#    kubectl exec -n {{ gluster_namespace }} {{ item }} -- sed -i -e 's|external_device_info_source = "none"|external_device_info_source = "udev"|g' /etc/lvm/lvm.conf
+  
