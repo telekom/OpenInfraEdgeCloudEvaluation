@@ -67,6 +67,11 @@
     state: present
     definition: "{{ lookup('template', 'k8s/service.yaml') }}"
 
+- name: "Create heketi secret"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/secret.yaml') }}"
+
 - name: "Create heketi deploy deployment"
   k8s:
     state: present
@@ -127,9 +132,8 @@
 - debug:
     var: k8s_heketi_cmd
 
-- shell: 'false'
-
-- name: "Load topology file into heteki - this will take >20 minutes: REALLY!"
+# Depending on the gluster configuration this will take LONG (>20 minutes!)
+- name: "Load topology file into heteki"
   command: >-
     {{ heketi_cli_local }} topology load --json="{{ heketi_config_dir }}/heketi-topology.json"
   register: heketi_load_topology

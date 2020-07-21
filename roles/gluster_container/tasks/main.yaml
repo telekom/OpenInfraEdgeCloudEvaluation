@@ -1,0 +1,34 @@
+---
+
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Installs the glusterfs as containers.
+# Note:
+# Even if this works and provides some advantages when it comes
+# to unification of operations and life-cycle-management, there are
+# SOME problems when it comes to run lvm (which relies on udev)
+# inside a container.
+
+- name: "Ensure that all hosts are reachable"
+  assert:
+    that:
+      - ansible_play_hosts == ansible_play_hosts_all
+    quiet: true
+
+- include: preparation.yaml
+- include: k8s-resources.yaml
+- include: gluster-config.yaml
+
+- include: gluster-patch.yaml
+  when: inventory_hostname == ansible_play_hosts_all.0
+ 

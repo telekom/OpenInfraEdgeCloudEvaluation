@@ -1,5 +1,17 @@
 ---
 
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Common thingies for the heketi installation
 
 - name: "Create local dir for file detemplation"
@@ -7,15 +19,11 @@
     state: directory
     path: detemplized
     mode: '0755'
-  run_once: true
-  delegate_to: localhost
 
 - name: "Create heketi.json file locally"
   template:
     src: heketi.json
     dest: detemplized/heketi.json
-  run_once: true
-  delegate_to: localhost
 
 - name: "Encode heketi.json"
   set_fact:
@@ -28,7 +36,6 @@
   template:
     src: heketi-topology.json
     dest: detemplized/heketi-topology.json
-  run_once: true
   delegate_to: localhost
 
 - name: "Encode heketi-topology.json"
@@ -38,9 +45,9 @@
     - detemplized/heketi-topology.json
   no_log: True
 
-#- name: "Encode ssh key"
-#  set_fact:
-#    private_key_base64: "{{ item | string | b64encode }}"
-#  with_file:
-#    - "{{ k8s_ssh_priv_key_local }}"
-#  no_log: True
+- name: "Encode ssh key"
+  set_fact:
+    private_key_base64: "{{ item | string | b64encode }}"
+  with_file:
+    - "{{ gluster_host_ssh_priv_key }}"
+  no_log: True

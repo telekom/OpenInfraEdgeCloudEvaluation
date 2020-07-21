@@ -1,0 +1,46 @@
+---
+
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Prepares the environment (on the target machines)
+# to be able to handle glusterfs and heketi
+# installation
+
+# The following is needed on client side to use the k8s
+# ansible module.
+
+# This is normally set before this role is called.
+# When there is no need for a proxy this is
+# created anyhow to have the same syntax in the commands.
+- name: "Ensure that the /etc/proxy.sh file exists"
+  copy:
+    content: ""
+    dest: /etc/proxy.sh
+    force: no
+    group: root
+    owner: root
+    mode: '0644'
+
+- name: "Install python3 kubnernetes package"
+  apt:
+    name: python3-kubernetes
+
+- name: "Install pip"
+  apt:
+    name: python3-pip
+
+- name: "Install openshift python lib"
+  shell: |
+    . /etc/proxy.sh && pip3 install openshift
+  args:
+    creates: /usr/local/lib/python3.6/dist-packages/openshift

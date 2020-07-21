@@ -1,0 +1,99 @@
+---
+
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# https://github.com/heketi/heketi/issues/1743
+- name: "Install lvm2 - needed by glusterfs / heketi"
+  become: true
+  become_user: root
+  apt:
+    name: lvm2
+
+- name: "Create link /usr/sbin/lvm"
+  file:
+    state: link
+    src: /sbin/lvm
+    dest: /usr/sbin/lvm
+    owner: root
+    group: root
+
+# Needs to be installed:
+# https://unix.stackexchange.com/questions/368007/ubuntu-glusterfs-unable-to-create-thinly-provisioned-volume-from-previously-cre/368207
+- name: "Install thin-provisioning-tools"
+  become: true
+  become_user: root
+  apt:
+    name: thin-provisioning-tools
+
+# There is a problem just installing this:
+# the glustereventsd.service will not start (timeout).
+# The reason is unknown.
+# Therefore the package is installed without starting
+# the services and the services are started in a dedicated
+# step.
+- name: "Install glusterfs server package"
+  shell: |
+    echo exit 101 > /usr/sbin/policy-rc.d
+    chmod +x /usr/sbin/policy-rc.d
+    apt install -y glusterfs-server || true
+    systemctl restart glustereventsd
+    rm /usr/sbin/policy-rc.d
+  args:
+    creates: /usr/sbin/glusterd
+
+- name: "Start and enable glusterfs"
+  systemd:
+    name: glusterd
+    enabled: true
+    state: started
+
+- name: "Check if glustereventsd needs restart"
+  shell: test $(gdbus call --system --dest org.freedesktop.systemd1 --object-path /org/freedesktop/systemd1/unit/glustereventsd_2eservice --method org.freedesktop.DBus.Properties.Get org.freedesktop.systemd1.Unit ActiveState) != "(<'active'>,)"
+  register: glustereventsd_service_failed
+  failed_when: glustereventsd_service_failed.rc >= 2
+  changed_when: False
+
+- name: "Restart glustereventsd if needed"
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: glustereventsd
+  when: glustereventsd_service_failed.rc == 0
+  
+- name: "Start and enable glustereventsd"
+  systemd:
+    name: glustereventsd
+    enabled: true
+    state: started
+
+- name: "Get number of peers"
+  shell: gluster peer status | head -1 | cut -d ":" -f 2 |  tr -d '[:space:]'
+  register: gluster_peers_connected_count
+  changed_when: False
+  
+- debug:
+    var: gluster_peers_connected_count
+
+- name: "WHAT 1"
+  debug:
+    msg: "{{ gluster_peers_connected_count.stdout | int }}"
+
+- name: "WHAT 2"
+  debug:
+    msg: "{{ groups['compute'] | length - 1 }}"
+
+- name: "Connect peers"
+  shell: gluster peer probe {{ item }}
+  with_items: "{{ groups['compute'] }}"
+  when: ( gluster_peers_connected_count.stdout | int ) != ( groups['compute'] | length - 1 )
+  run_once: true

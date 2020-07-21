@@ -1,0 +1,51 @@
+---
+
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: heketi-storage-copy-job
+  labels:
+    deploy-heketi: support
+  namespace: "{{ heketi_namespace }}"
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: heketi-storage-copy-job
+    spec:
+      volumes:
+      - name: heketi-storage
+        glusterfs:
+          endpoints: heketi-storage-endpoints
+          path: heketidbstorage
+      - name: heketi-storage-secret
+        secret:
+          secretName: heketi-storage-secret
+      containers:
+        - name: heketi
+          image: heketi/heketi:dev
+          command:
+          - cp
+          - "/db/heketi.db"
+          - "/heketi"
+          resources: {}
+          volumeMounts:
+            - name: heketi-storage
+              mountPath: "/heketi"
+            - name: heketi-storage-secret
+              mountPath: "/db"
+      restartPolicy: Never
+status: {}

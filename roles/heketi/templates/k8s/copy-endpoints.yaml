@@ -12,16 +12,15 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-- name: "Ensure that all hosts are reachable"
-  assert:
-    that:
-      - ansible_play_hosts == ansible_play_hosts_all
-    quiet: true
-
-- include: preparation.yaml
-- include: k8s-resources.yaml
-- include: gluster-config.yaml
-
-- include: gluster-patch.yaml
-  when: inventory_hostname == ansible_play_hosts_all.0
- 
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: heketi-storage-endpoints
+  namespace: "{{ heketi_namespace }}"
+subsets:
+{% for host, ip in gluster_host_ips.items() %}      
+- addresses:
+  - ip: "{{ ip }}"
+  ports:
+  - port: 1
+{% endfor %}

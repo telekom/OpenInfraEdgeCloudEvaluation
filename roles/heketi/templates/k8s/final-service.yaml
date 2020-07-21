@@ -1,0 +1,32 @@
+---
+
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: heketi
+  namespace: "{{ heketi_namespace }}"
+  labels:
+    glusterfs: heketi-service
+    deploy-heketi: support
+    heketi: service
+  annotations:
+    description: Exposes Heketi Service
+spec:
+  selector:
+    name: heketi
+  ports:
+  - name: heketi
+    port: 8080
+    targetPort: 8080

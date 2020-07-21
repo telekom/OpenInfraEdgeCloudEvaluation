@@ -1,0 +1,32 @@
+---
+
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+- name: "Get all worker nodes: assume that on all a glusterd should run"
+  k8s_info:
+    kind: Node
+  register: gluster_hosts_info
+
+#- debug:
+#    var: gluster_hosts_info
+
+- name: "Generate gluster_host_ips"
+  set_fact:
+    gluster_host_ips: "{{ gluster_host_ips | combine({item.metadata.name: item.status.addresses[0].address}) }}"
+  with_items: "{{ gluster_hosts_info.resources }}"
+  vars:
+    gluster_host_ips: {}
+
+- name: "Output list"
+  debug:
+    var: gluster_host_ips

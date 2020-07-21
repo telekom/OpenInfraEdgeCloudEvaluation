@@ -1,0 +1,69 @@
+---
+
+# This file is part of the k8s-gluster-heketi-ansible project,
+# an ansible collection to install glusterfs and heketi into
+# kubernetes to provide dynamic persistent volumes.
+#
+# (c) 2020 Andreas Florath, Deutsche Telekom AG
+#
+# By default all files of this project are licensed under the Apache-2.0
+# license. For details see the file 'LICENSE' in the top directory.
+# https://opensource.org/licenses/Apache-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Preconditions: the file "{{ heketi_config_dir }}/heketi-storage.json" must
+#   exists and contains a valid kubernetes resource definition
+# The problem here is, that this cannot just be used for the final
+# deployment for different reasons, e.g. missing namespaces of the resources.
+# Therefore the needed data is extraced and used for the new resources.
+
+- name: "Get DB from heketi-storage.json"
+  shell: jq -r '.items[0]["data"]["heketi.db"]' "{{ heketi_config_dir }}/heketi-storage.json"
+  register: heketi_db_raw
+
+#- debug:
+#    var: heketi_db_raw
+
+- name: "Create heketi secret for COPY task"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/copy-secret.yaml') }}"
+
+- name: "Create heketi endpoints for COPY task"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/copy-endpoints.yaml') }}"
+
+- name: "Create heketi service for COPY task"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/copy-service.yaml') }}"
+
+- name: "Create heketi job for COPY task"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/copy-job.yaml') }}"
+
+- name: "Create heketi service for FINAL"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/final-service.yaml') }}"
+
+- name: "Create heketi deployment for FINAL"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/final-deployment.yaml') }}"
+
+- name: "Get endpoint"
+  shell: kubectl describe -n gluster-heketi-ns svc/heketi | grep "Endpoints:" | awk '{print $2}'
+  register: heketi_service_endpoint
+
+- name: "Create storage class"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'k8s/final-storage-class.yaml') }}"
+
+
+- name: "STOP"
+  shell: 'false'

@@ -12,10 +12,25 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+- name: "Common settings for heketi"
+  include: heketi-common.yaml
+  run_once: true
+  delegate_to: localhost
+
+- name: "Check if already bootstraped"
+  stat:
+    path: "{{ heketi_config_dir }}/heketi-storage.json"
+  register: heketi_bootstrap_check
+  when: inventory_hostname == ansible_play_hosts_all.0
+
 - name: "Bootstrap heketi"
   include: heketi-bootstrap.yaml
   # Ensure that it is running only once and always
   # on the same host.
+  when: inventory_hostname == ansible_play_hosts_all.0 and not heketi_bootstrap_check.stat.exists
+
+- name: "Finalize heketi"
+  include: heketi-finalize.yaml
   when: inventory_hostname == ansible_play_hosts_all.0
 
 - name: "STOP IT"

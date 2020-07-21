@@ -39,3 +39,10 @@
     . /etc/proxy.sh && pip3 install openshift
   args:
     creates: /usr/local/lib/python3.6/dist-packages/openshift
+
+- name: "Install / Upgrade requests python lib"
+  shell: |
+    . /etc/proxy.sh && pip3 install -U requests
+  args:
+    creates: /usr/local/lib/python3.6/dist-packages/requests
+    
