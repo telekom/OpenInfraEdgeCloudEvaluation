@@ -89,4 +89,4 @@ By default all files of this project are licensed under the Apache-2.0
 license. For details see the file 'LICENSE' in the top directory.
 https://opensource.org/licenses/Apache-2.0
 
-|copy| 2020 Andreas Florath, Deutsche Telekom AG
+Copyright 2020 Andreas Florath, Deutsche Telekom AG
