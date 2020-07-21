@@ -70,21 +70,23 @@ source code is used it is marked as such.
   https://github.com/manics/ansible-role-k8s-heketi-gluster
   This project followed a very similar approach as
   k8s-gluster-heketi-ansible. The problem is, that this is not longer
-  maintained and does not support up to date heketi versions.
+  maintained and does not support up to date heketi versions and uses
+  commands / shell for kubernetes instead of the Ansible 'k8s' module
+  which makes things much easier to handle.
 * gluster-kubernetes
   https://github.com/gluster/gluster-kubernetes
   This project provides (mostly) a shell script to install and
   configure heketi.
   The project is archived (read-only) and there is no active
   developemnt done.  The result is, that it does not work with current
-  kubernetes versions.  Also IMHO the bash script needs some
-  refactoring.
+  kubernetes versions.
 
 
 License
 =======
 
-By default all program files (source code + configuration) of this
-project are licensed under the Apache-2.0 license. For details see the
-file 'LICENSE' in the top directory.
+By default all files of this project are licensed under the Apache-2.0
+license. For details see the file 'LICENSE' in the top directory.
 https://opensource.org/licenses/Apache-2.0
+
+(c) 2020 Andreas Florath, Deutsche Telekom AG
