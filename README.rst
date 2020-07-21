@@ -23,10 +23,12 @@ volume handling.
 Status
 ======
 
-In development.
+Ready to use.
 
-gluster role is ready to use.
-heketi role is under heavy development and can not yet be used.
+Installation
+============
+
+Installation can be done using `ansible-galaxy collection install`.
 
 Usage
 =====
@@ -36,14 +38,19 @@ To use the roles, just include them into your playbook.
 
 .. code:: ansible
 
-   - hosts: control compute                                                                                                                         
-     user: root                                                                                                                                     
-     roles:                                                                                                                                         
-       - telekom.k8s_gluster_heketi_ansible.preparation                                                                                             
-       - telekom.k8s_gluster_heketi_ansible.gluster_host                                                                                            
-       - telekom.k8s_gluster_heketi_ansible.heketi                                                                                                  
-     vars:                                                                                                                                          
-       - gluster_host_ssh_priv_key: "keys/k8suser"                                                                                                  
+   - hosts: control compute
+     user: root
+     roles:
+       - telekom.k8s_gluster_heketi_ansible.preparation
+       - telekom.k8s_gluster_heketi_ansible.gluster_host
+       - telekom.k8s_gluster_heketi_ansible.heketi
+     vars:
+       - gluster_host_ssh_priv_key: "path/to/keys/file"
+
+Note: there is also a `telekom.k8s_gluster_heketi_ansible.gluster_container`
+role.  This is seen as a replacement drop in for the `gluster_host`.  Instead
+of using glusterd on the host, the official gluster container are used.  The
+problem is, that this has some darwbacks as it uses lvm in an udev free space.
 
 
 References
@@ -81,4 +88,3 @@ By default all program files (source code + configuration) of this
 project are licensed under the Apache-2.0 license. For details see the
 file 'LICENSE' in the top directory.
 https://opensource.org/licenses/Apache-2.0
-
