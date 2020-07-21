@@ -63,7 +63,3 @@
   k8s:
     state: present
     definition: "{{ lookup('template', 'k8s/final-storage-class.yaml') }}"
-
-
-- name: "STOP"
-  shell: 'false'

@@ -32,7 +32,3 @@
 - name: "Finalize heketi"
   include: heketi-finalize.yaml
   when: inventory_hostname == ansible_play_hosts_all.0
-
-- name: "STOP IT"
-  shell: "false"
-  run_once: true
