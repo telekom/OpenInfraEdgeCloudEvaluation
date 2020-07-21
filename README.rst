@@ -28,6 +28,24 @@ In development.
 gluster role is ready to use.
 heketi role is under heavy development and can not yet be used.
 
+Usage
+=====
+
+In your hosts file define `control` and `compute` node groups.
+To use the roles, just include them into your playbook.
+
+.. code:: ansible
+
+   - hosts: control compute                                                                                                                         
+     user: root                                                                                                                                     
+     roles:                                                                                                                                         
+       - telekom.k8s_gluster_heketi_ansible.preparation                                                                                             
+       - telekom.k8s_gluster_heketi_ansible.gluster_host                                                                                            
+       - telekom.k8s_gluster_heketi_ansible.heketi                                                                                                  
+     vars:                                                                                                                                          
+       - gluster_host_ssh_priv_key: "keys/k8suser"                                                                                                  
+
+
 References
 ==========
 
