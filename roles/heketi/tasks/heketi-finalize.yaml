@@ -59,7 +59,22 @@
   shell: kubectl describe -n gluster-heketi-ns svc/heketi | grep "Endpoints:" | awk '{print $2}'
   register: heketi_service_endpoint
 
+# Create storage class tasks fails if it is already available
+# even if there is no change.
+# Therefore check, if the resource is available beforehand.
+
+- name: "Check if storage class is already available"
+  k8s_info:
+    kind: StorageClass
+    name: glusterfs-storage
+  register: storage_class_check
+  ignore_errors: true
+
+- debug:
+    var: storage_class_check
+
 - name: "Create storage class"
   k8s:
     state: present
     definition: "{{ lookup('template', 'k8s/final-storage-class.yaml') }}"
+  when: storage_class_check.resources | length > 0

@@ -24,6 +24,19 @@
 - name: "Create topology file"
   template:
     src: heketi-topology.json
+    dest: detemplized/heketi-topology.json
+  delegate_to: localhost
+
+- name: "Encode heketi-topology.json"
+  set_fact:
+    topology_json_base64: "{{ item | string | b64encode }}"
+  with_file:
+    - detemplized/heketi-topology.json
+  no_log: True
+
+- name: "Create topology file"
+  template:
+    src: heketi-topology.json
     dest: "{{ heketi_config_dir }}/heketi-topology.json"
     owner: root
     group: root
