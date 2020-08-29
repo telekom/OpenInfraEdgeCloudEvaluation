@@ -19,6 +19,13 @@
   apt:
     name: lvm2
 
+# This is needed for newer Ubuntu versions - as they have already the
+# lvm installed in /usr/sbin
+- name: "Check if /usr/sbin/lvm exists"
+  stat:
+    path: /usr/sbin/lvm
+  register: usr_sbin_lvm
+
 - name: "Create link /usr/sbin/lvm"
   file:
     state: link
@@ -26,6 +33,7 @@
     dest: /usr/sbin/lvm
     owner: root
     group: root
+  when: not usr_sbin_lvm.stat.exists
 
 # Needs to be installed:
 # https://unix.stackexchange.com/questions/368007/ubuntu-glusterfs-unable-to-create-thinly-provisioned-volume-from-previously-cre/368207
@@ -90,10 +98,22 @@
 
 - name: "WHAT 2"
   debug:
-    msg: "{{ groups['compute'] | length - 1 }}"
+    msg: "{{ groups['compute'] | length - 1 | int }}"
 
+- name: "Set number of connected peers and number of expected peers as fact"
+  set_fact:
+    gluster_peers_num_expected: "{{ groups['compute'] | length - 1 | int }}"
+    gluster_peers_num_connected: "{{ gluster_peers_connected_count.stdout | int }}"
+
+- debug:
+    var: gluster_peers_num_expected
+
+- debug:
+    var: gluster_peers_num_connected
+
+# It looks that 'run_once: true' does not work here as it returns always false.
+# Therefore the check for the inventory_hostname is used.
 - name: "Connect peers"
   shell: gluster peer probe {{ item }}
   with_items: "{{ groups['compute'] }}"
-  when: ( gluster_peers_connected_count.stdout | int ) != ( groups['compute'] | length - 1 )
-  run_once: true
+  when: inventory_hostname == groups['compute'][0] and gluster_peers_num_expected != gluster_peers_num_connected
